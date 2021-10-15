@@ -57,23 +57,3 @@ UN Global Compact,UNGC,"The world's largest initiative to encourage businesses w
 United Nations Environment Program Finance Initiative,UNEP FI,A global initiative participated by over 300 leading financial institutions and the only international partnership between UNEP and international financial sectors
 United Nations Framework Convention on Climate Change,UNFCCC,A global agreement to achieve the stabilization of GHG concentrations at a level that would prevent dangerous interference with the climate system
 Value Balancing Alliance,VBA,"An initiative designed to create a way of measuring and comparing the value of contributions made by businesses to society, the economy, and the environment"
-,,
-,,
-Problems:,,
-,,
-Asset Managers,,
-"1. Eastspring: Our data is a PRI report, so no full form of PRI is spelled out in the report",,
-2. Vanguard: Full form of TFCD is split into 2 pages so text extraction may not have captured it ,,
-3. CNCBI: Got no mention of climate related information (can consider removing this report),,
-4. Everbright: Cannot read anything from PDF,,
-,,
-Asian Banks,,
-"1. CITIC: Probably should remove since their ""ESG report"" is just a 2 page article ",,
-2. POSB: Should remove too as it is just an online article ,,
-"3. BTN: GRI all in brackets, but current method only uses full form, not acronym",,
-,,
-Pension Funds:,,
-1. CPF: Report has nothing about ESG (can consider removing this report),,
-2. EPF: Report has nothing about ESG (can consider removing this report),,
-,,
-Insurance (currently no problem) ,,

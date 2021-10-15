@@ -13,12 +13,13 @@ app = dash.Dash(__name__)
 
 # -- Import and clean data (importing csv into pandas)--------------------------
 #initiatives_file = pd.read_excel('data/ESG_Initiatives.xlsx', usecols="A,B,C")
-initiatives_file = pd.read_csv()
+initiatives_file = pd.read_csv('data/esg_initiatives.csv')
+
 # replace NaN for initiatives without acronym
-#initiatives_file = initiatives_file.replace({np.nan: '-'})
+initiatives_file = initiatives_file.replace({np.nan: '-'})
 
 # dictionary: key-initiative spelled out fully, value-[acronym, description]
-#initiatives_dict = initiatives_file.set_index('Initiative').T.to_dict('list')
+initiatives_dict = initiatives_file.set_index('Initiative').T.to_dict('list')
 
 all_initiative_array = pd.read_csv('data/insurance_initiatives.csv') # change path according to FI
 all_initiative_array = all_initiative_array.drop(all_initiative_array.columns[0], axis=1)
