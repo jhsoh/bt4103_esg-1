@@ -29,7 +29,7 @@ all_initiative_array = all_initiative_array.drop(all_initiative_array.columns[0]
 app.layout = html.Div([
 
     html.H1("Decarbonisation Dashboard", style={'text-align': 'center'}),
-
+    #Testing
     html.Div(id='output_container', children=[]),
     html.Br(),
     dcc.Dropdown(id="company",
