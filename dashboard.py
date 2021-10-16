@@ -9,6 +9,10 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+from wordcloud import WordCloud
+import base64
+from io import BytesIO
+
 app = dash.Dash(__name__)
 
 # -- Import and clean data (importing csv into pandas)--------------------------
