@@ -21,7 +21,12 @@ import base64
 app = dash.Dash(__name__)
 
 # -- Import and clean data (importing csv into pandas)--------------------------
-#initiatives_file = pd.read_excel('data/ESG_Initiatives.xlsx', usecols="A,B,C")
+
+### Load company names to display in dropdown menu
+companylabels = pd.read_csv('data/companylabels.csv', usecols=['FullName', 'ShortForm'])
+companylabels = companylabels.values.tolist()
+
+### For global initiatives table 
 initiatives_file = pd.read_csv('data/esg_initiatives.csv')
 
 # replace NaN for initiatives without acronym
@@ -30,9 +35,16 @@ initiatives_file = initiatives_file.replace({np.nan: '-'})
 # dictionary: key-initiative spelled out fully, value-[acronym, description]
 initiatives_dict = initiatives_file.set_index('Initiative').T.to_dict('list')
 
-all_initiative_array = pd.read_csv('data/insurance_initiatives.csv') # change path according to FI
+# combine all initiatives from 4 FIs into one dataframe
+ab_initiatives = pd.read_csv('data/asian_banks_initiatives.csv')
+as_initiatives = pd.read_csv('data/asset_managers_initiatives.csv')
+ins_initiatives = pd.read_csv('data/insurance_initiatives.csv')
+pf_initiatives = pd.read_csv('data/pension_funds_initiatives.csv')
+all_initiative_array = pd.concat([ab_initiatives, as_initiatives, ins_initiatives, pf_initiatives])
 all_initiative_array = all_initiative_array.drop(all_initiative_array.columns[0], axis=1)
+all_initiative_array = all_initiative_array.reset_index(drop=True)
 
+### For word cloud
 dfm = pd.DataFrame({'word': ['apple', 'pear', 'orange'], 'freq': [1,3,9]})
 
 # ------------------------------------------------------------------------------
@@ -44,32 +56,10 @@ app.layout = html.Div([
     html.Div(id='output_container', children=[]),
     html.Br(),
     dcc.Dropdown(id="company",
-                 options=[
-                     {"label": "AXA", "value": "AXA"},
-                     {"label": "AIA", "value": "AIA"},
-                     {"label": "Cathay Life Insurance", "value": "Cathay"},
-                     {"label": "Dai-ichi Life Insurance", "value": "DaiichiLife"},
-                     {"label": "Shinkong Insurance", "value": "ShinKong"},
-                     {"label": "Sun Life", "value": "SunLife"},
-                     {"label": "Ping An Insurance", "value": "PingAn"},
-                     {"label": "Japan Post Insurance", "value": "JapanPost"},
-                     {"label": "Prudential", "value": "Prudential"},
-                     {"label": "Mitsubishi UFJ Financial Group", "value": "MUFG"},
-                     {"label": "FWD Insurance", "value": "FWD"},
-                     {"label": "Nippon Life Insurance", "value": "NipponLife"},
-                     {"label": "Asahi Mutual Life Insurance Company", "value": "AsahiMutual"},
-                     {"label": "Kyobo Life Insurance", "value": "Kyobo"},
-                     {"label": "Meiji Yasuda Life", "value": "MeijiYasuda"},
-                     {"label": "Tokio Marine Holdings", "value": "TokioMarine"},
-                     {"label": "KB Financial Group", "value": "KBFG"},
-                     {"label": "Fukoku Mutual Life Insurance Company", "value": "Fukoku"},
-                     {"label": "DGB Life Insurance", "value": "DGB"},
-                     {"label": "Government Pension Investment Fund (Japan)", "value": "GPIF"},
-                     {"label": "Taiwan Life Insurance ", "value": "TaiwanLife"},
-                     {"label": "Nan Shan Life Insurance ", "value": "NanShanLife"}],
+                 options=[{'label': x[0], 'value': x[1]} for x in companylabels],
                  multi=False,
                  value="AXA",
-                 style={'width': "40%"}
+                 style={'width': "50%"}
                  ),
 
     dcc.Graph(id='initiative_table', figure={}),
@@ -86,14 +76,15 @@ app.layout = html.Div([
     [Input(component_id='company', component_property='value')]
 )
 def update_graph(option_slctd):
-    print(option_slctd)
-    print(type(option_slctd))
+    print(option_slctd) # for checking
+    print(type(option_slctd)) # for checking
 
     container = "Select Company"
 
-    company_initiative = ast.literal_eval(all_initiative_array.loc[all_initiative_array['Company'] == option_slctd]['Initiatives'].item())
+    company_initiative = all_initiative_array.set_index('Company').Initiatives.loc[option_slctd]
+    company_initiative = ast.literal_eval(company_initiative)
     company_initiative = sorted(company_initiative)
-
+    
     data = []
     for full_name in company_initiative:
         acronym = initiatives_dict[full_name][0]
