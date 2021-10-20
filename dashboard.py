@@ -60,18 +60,27 @@ card_sentiment = dbc.Card([
                                 max=5,
                                 min=0,
                                 className='d-flex justify-content-center',
-                                style={'height':200}
-                        )
+                                style={'height':250},
+                                showCurrentValue=True
+                        ),
                     ])
-                ])     
+                ], color='light', outline=True)     
 
 card_decarbonization_ratings = dbc.Card([
                                     dbc.CardBody([
-                                        html.H5('Decarbonisation Ratings'),
-                                        html.H1(id='decarbonization_rating', children='')
+                                        html.H5('Decarbonisation Ratings', className='text-center'),
+                                        html.H1(id='decarbonization_rating', children='', className='text-center text-success'), 
+                                        html.P('Out of 100', className='text-center')
                                     ]),
-                                ], color='success', outline=True)
+                                ], color='light', outline=True)
 
+card_initiative_count = dbc.Card([
+                            dbc.CardBody([
+                                html.H5('Actively Participating In', className='text-center'),
+                                html.H1(id='initiative_count', children='', className='text-center text-success'),
+                                html.P('Global Initiatives', className='text-center')
+                            ]),
+                        ], color='light', outline=True)
                                 
 # Layout -----------------------------------------------------------------------------
 app.layout = dbc.Container([
@@ -99,7 +108,11 @@ app.layout = dbc.Container([
     # Row 3: For Sentiment Gauge Chart, Big Number, BoxPlot
     dbc.Row([
         dbc.Col([card_sentiment], width={'size':3, 'offset':0, 'order':1}),
-        dbc.Col([card_decarbonization_ratings], width={'size':3, 'offset':0, 'order':2}),
+        dbc.Col([
+            card_decarbonization_ratings,
+            html.Br(),
+            card_initiative_count
+        ], width={'size':3, 'offset':0, 'order':2}),
         dbc.Col([
             dcc.Graph(id='boxplot', figure={})
         ], width={'size':6, 'offset':0, 'order':3})
@@ -135,8 +148,17 @@ def update_output(value):
 def update_output(company):
     rating = round(ratings_file.set_index('name').percentile.loc[company])
     return rating
-    
 
+# For Big Numbers 2: Initiative Count
+@app.callback(
+    Output(component_id='initiative_count', component_property='children'),
+    Input(component_id='company_dropdown', component_property='value')
+    )
+def update_output(company):
+    company_initiative = all_initiative_array.set_index('Company').Initiatives.loc[company]
+    count = len(ast.literal_eval(company_initiative))
+    return count
+    
 # Global Initiatives Table
 @app.callback(
     Output(component_id='initiative_table', component_property='figure'),
