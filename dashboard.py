@@ -114,10 +114,14 @@ app.layout = dbc.Container([
             card_initiative_count
         ], width={'size':3, 'offset':0, 'order':2}),
         dbc.Col([
-            dcc.Graph(id='boxplot', figure={})
+            html.H5('Benchmark Comparison', className='text-center'), 
+            dcc.Graph(id='bulletplot', figure={})
         ], width={'size':6, 'offset':0, 'order':3})
     ]),
 
+    html.Br(),
+    html.Br(),
+    
     # Row 4: For Global Initiatives Table & WordCloud
     dbc.Row([
         dbc.Col([
@@ -158,7 +162,64 @@ def update_output(company):
     company_initiative = all_initiative_array.set_index('Company').Initiatives.loc[company]
     count = len(ast.literal_eval(company_initiative))
     return count
-    
+
+# For Bullet Plot
+@app.callback(
+    Output(component_id='bulletplot', component_property='figure'),
+    Input(component_id='company_dropdown', component_property='value')
+    )
+def update_graph(option_slctd):
+    fig = go.Figure()
+
+    fig.add_trace(go.Indicator(
+        mode = "number+gauge+delta", value = 73,
+        delta = {'reference': 50},
+        domain = {'x': [0.25, 1], 'y': [0.08, 0.25]},
+        title = {'text': "Decarbonization Rating"},
+        gauge = {
+            'shape': "bullet",
+            'axis': {'range': [None, 100]},
+            'steps': [
+                {'range': [0, 25], 'color': "#aed581"}, # 25th percentile
+                {'range': [25, 50], 'color': "#9ccc65"}, # 50th percentile
+                {'range': [50, 75], 'color': "#8bc34a"}, # 75th percentile
+                {'range': [75, 100], 'color': "#7cb342"}], # 100th percentile
+            'bar': {'color': "black"}}))
+
+    fig.add_trace(go.Indicator(
+        mode = "number+gauge+delta", value = 5,
+        delta = {'reference': 4},
+        domain = {'x': [0.25, 1], 'y': [0.4, 0.6]},
+        title = {'text': "Initiative Count"},
+        gauge = {
+            'shape': "bullet",
+            'axis': {'range': [None, 10]},
+            'steps': [
+                {'range': [0, 3], 'color': "#aed581"}, # 25th percentile
+                {'range': [3, 4], 'color': "#9ccc65"}, # 50th percentile
+                {'range': [4, 6], 'color': "#8bc34a"}, # 75th percentile
+                {'range': [6, 10], 'color': "#7cb342"}], # 100th percentile
+            'bar': {'color': "black"}}))
+
+    fig.add_trace(go.Indicator(
+        mode = "number+gauge+delta", value = 3.6, #company's score
+        delta = {'reference': 3.4}, #FI average
+        domain = {'x': [0.25, 1], 'y': [0.7, 0.9]},
+        title = {'text' :"Overall Sentiment"},
+        gauge = {
+            'shape': "bullet",
+            'axis': {'range': [None, 5]}, # 0 to 5
+            'steps': [ 
+                {'range': [0, 2.1], 'color': "#aed581"}, # 25th percentile
+                {'range': [2.1, 3.4], 'color': "#9ccc65"}, # 50th percentile
+                {'range': [3.4, 4.2], 'color': "#8bc34a"}, # 75th percentile
+                {'range': [4.2, 5], 'color': "#7cb342"}], # 100th percentile
+            'bar': {'color': "black"}}))
+
+    fig.update_layout(height = 300 , margin = {'t':0, 'b':0, 'l':0})
+    fig.update_traces(title_font_size=11)
+    return fig
+
 # Global Initiatives Table
 @app.callback(
     Output(component_id='initiative_table', component_property='figure'),
