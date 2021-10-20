@@ -40,15 +40,19 @@ initiatives_dict = initiatives_file.set_index('Initiative').T.to_dict('list')
 all_initiative_array = pd.read_csv('data/all_initiatives.csv')
 
 # For WordCloud
-dfm = pd.DataFrame({'word': ['climate', 'emission', 'esg', 'investment', 'energy'], 'freq': [10, 8, 6, 4, 1]})
+dfm = pd.DataFrame({'word': ['climate', 'emission', 'esg', 'investment', 'energy', 'initiative', 'management', 'sustainability'], 
+                    'freq': [20, 18, 16, 14, 11, 8, 7, 4]})
 def plot_wordcloud(data):
     d = {a: x for a, x in data.values}
-    wc = WordCloud(background_color='white', width=480, height=360)
+    wc = WordCloud(background_color='white', width=480, height=400)
     wc.fit_words(d)
     return wc.to_image()
 
 # For decarbonization rating
 ratings_file = pd.read_csv('data/all_percentile.csv', usecols=['name', 'percentile'])
+
+# For sentiment 
+sentiment_file = pd.read_csv('data/sentiment_dummy.csv', usecols=['Company', 'Sentiment'])
 
 # Cards --------------------------------------------------------------------------------
 card_sentiment = dbc.Card([
@@ -92,6 +96,7 @@ card_initiatives = dbc.Card([
 card_wordcloud = dbc.Card([
                     dbc.CardBody([
                         html.H5('WordCloud', className='text-center'),
+                        html.Br(),
                         dbc.CardImg(id='word_cloud', className='mx-auto')
                     ])
                 ], className='card h-100')
@@ -102,7 +107,7 @@ app.layout = dbc.Container([
     # Row 1: For Header and dropdown
     dbc.Row([
         dbc.Col(html.H1('Decarbonization Dashboard',
-                        className='text-center, mb-4'),
+                        className='text-center mb-4'),
                 width=12)
     ]),
 
@@ -116,7 +121,6 @@ app.layout = dbc.Container([
         ], width={'size':5})
     ]),
 
-    html.Br(),
     html.Br(),
 
     # Row 3: For Sentiment Gauge Chart, Big Number, BoxPlot
@@ -138,7 +142,6 @@ app.layout = dbc.Container([
     ]),
 
     html.Br(),
-    html.Br(),
     
     # Row 4: For Global Initiatives Table & WordCloud
     dbc.Row([
@@ -153,8 +156,9 @@ app.layout = dbc.Container([
     Output(component_id='sentiment_gauge', component_property='value'),
     Input(component_id='company_dropdown', component_property='value')
 )
-def update_output(value):
-    return value # !! need to change according to company
+def update_output(company):
+    sentiment = sentiment_file.set_index('Company').Sentiment.loc[company]
+    return sentiment
 
 # For Big Numbers 1: Decarbonization Rating
 @app.callback(
@@ -180,49 +184,52 @@ def update_output(company):
     Output(component_id='bulletplot', component_property='figure'),
     Input(component_id='company_dropdown', component_property='value')
     )
-def update_graph(option_slctd):
+def update_graph(company):
     fig = go.Figure()
 
     fig.add_trace(go.Indicator(
-        mode = "gauge", value = 73,
+        mode = "gauge", 
+        value = round(ratings_file.set_index('name').percentile.loc[company]),
         domain = {'x': [0.25, 1], 'y': [0.08, 0.25]},
         title = {'text': "Decarbonization Rating"},
         gauge = {
             'shape': "bullet",
             'axis': {'range': [None, 100]},
             'steps': [
-                {'range': [0, 25], 'color': "#aed581"}, # 25th percentile
-                {'range': [25, 50], 'color': "#9ccc65"}, # 50th percentile
-                {'range': [50, 75], 'color': "#8bc34a"}, # 75th percentile
-                {'range': [75, 100], 'color': "#7cb342"}], # 100th percentile
+                {'range': [0, 25], 'color': "#F25757"}, # 25th percentile
+                {'range': [25, 50], 'color': "#FFC15E"}, # 50th percentile
+                {'range': [50, 75], 'color': "#F5FF90"}, # 75th percentile
+                {'range': [75, 100], 'color': "#D6FFB7"}], # 100th percentile
             'bar': {'color': "black"}}))
 
     fig.add_trace(go.Indicator(
-        mode = "gauge", value = 5,
+        mode = "gauge", 
+        value = len(ast.literal_eval(all_initiative_array.set_index('Company').Initiatives.loc[company])),
         domain = {'x': [0.25, 1], 'y': [0.4, 0.6]},
         title = {'text': "Initiative Count"},
         gauge = {
             'shape': "bullet",
             'axis': {'range': [None, 10]},
             'steps': [
-                {'range': [0, 3], 'color': "#aed581"}, # 25th percentile
-                {'range': [3, 4], 'color': "#9ccc65"}, # 50th percentile
-                {'range': [4, 6], 'color': "#8bc34a"}, # 75th percentile
-                {'range': [6, 10], 'color': "#7cb342"}], # 100th percentile
+                {'range': [0, 3], 'color': "#F25757"}, # 25th percentile
+                {'range': [3, 4], 'color': "#FFC15E"}, # 50th percentile
+                {'range': [4, 6], 'color': "#F5FF90"}, # 75th percentile
+                {'range': [6, 10], 'color': "#D6FFB7"}], # 100th percentile
             'bar': {'color': "black"}}))
 
     fig.add_trace(go.Indicator(
-        mode = "gauge", value = 3.6, #company's score
+        mode = "gauge", 
+        value = sentiment_file.set_index('Company').Sentiment.loc[company], #company's score
         domain = {'x': [0.25, 1], 'y': [0.7, 0.9]},
         title = {'text' :"Overall Sentiment"},
         gauge = {
             'shape': "bullet",
             'axis': {'range': [None, 5]}, # 0 to 5
             'steps': [ 
-                {'range': [0, 2.1], 'color': "#aed581"}, # 25th percentile
-                {'range': [2.1, 3.4], 'color': "#9ccc65"}, # 50th percentile
-                {'range': [3.4, 4.2], 'color': "#8bc34a"}, # 75th percentile
-                {'range': [4.2, 5], 'color': "#7cb342"}], # 100th percentile
+                {'range': [0, 2.1], 'color': "#F25757"}, # 25th percentile
+                {'range': [2.1, 3.4], 'color': "#FFC15E"}, # 50th percentile
+                {'range': [3.4, 4.2], 'color': "#F5FF90"}, # 75th percentile
+                {'range': [4.2, 5], 'color': "#D6FFB7"}], # 100th percentile
             'bar': {'color': "black"}}))
 
     fig.update_layout(height = 250 , margin = {'t':0, 'b':0})
