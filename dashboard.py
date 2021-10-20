@@ -81,6 +81,20 @@ card_initiative_count = dbc.Card([
                                 html.P('Global Initiatives', className='text-center')
                             ]),
                         ], color='light', outline=True)
+
+card_initiatives = dbc.Card([
+                        dbc.CardBody([
+                            html.H5('Global Initiatives', className='text-center'),
+                            dcc.Graph(id='initiative_table', figure={})
+                        ])
+                    ])
+
+card_wordcloud = dbc.Card([
+                    dbc.CardBody([
+                        html.H5('WordCloud', className='text-center'),
+                        dbc.CardImg(id='word_cloud', className='mx-auto')
+                    ])
+                ], className='card h-100')
                                 
 # Layout -----------------------------------------------------------------------------
 app.layout = dbc.Container([
@@ -114,8 +128,12 @@ app.layout = dbc.Container([
             card_initiative_count
         ], width={'size':3, 'offset':0, 'order':2}),
         dbc.Col([
-            html.H5('Benchmark Comparison', className='text-center'), 
-            dcc.Graph(id='bulletplot', figure={})
+            dbc.Card([
+                dbc.CardBody([
+                    html.H5('Benchmark Comparison', className='text-center'), 
+                    dcc.Graph(id='bulletplot', figure={})
+                ])
+            ])
         ], width={'size':6, 'offset':0, 'order':3})
     ]),
 
@@ -124,14 +142,8 @@ app.layout = dbc.Container([
     
     # Row 4: For Global Initiatives Table & WordCloud
     dbc.Row([
-        dbc.Col([
-            html.H5('Global Initiatives', className='text-center'),
-            dcc.Graph(id='initiative_table', figure={})
-        ], width={'size':7, 'offset':0, 'order':1}),
-        dbc.Col([
-            html.H5('WordCloud', className='text-center'),
-            dbc.CardImg(id='word_cloud')
-        ], width={'size':5, 'offset':0, 'order':2})
+        dbc.Col([card_initiatives], width={'size':7, 'offset':0, 'order':1}),
+        dbc.Col([card_wordcloud], width={'size':5, 'offset':0, 'order':2})
     ])
 ], fluid=True)
 
@@ -172,8 +184,7 @@ def update_graph(option_slctd):
     fig = go.Figure()
 
     fig.add_trace(go.Indicator(
-        mode = "number+gauge+delta", value = 73,
-        delta = {'reference': 50},
+        mode = "gauge", value = 73,
         domain = {'x': [0.25, 1], 'y': [0.08, 0.25]},
         title = {'text': "Decarbonization Rating"},
         gauge = {
@@ -187,8 +198,7 @@ def update_graph(option_slctd):
             'bar': {'color': "black"}}))
 
     fig.add_trace(go.Indicator(
-        mode = "number+gauge+delta", value = 5,
-        delta = {'reference': 4},
+        mode = "gauge", value = 5,
         domain = {'x': [0.25, 1], 'y': [0.4, 0.6]},
         title = {'text': "Initiative Count"},
         gauge = {
@@ -202,8 +212,7 @@ def update_graph(option_slctd):
             'bar': {'color': "black"}}))
 
     fig.add_trace(go.Indicator(
-        mode = "number+gauge+delta", value = 3.6, #company's score
-        delta = {'reference': 3.4}, #FI average
+        mode = "gauge", value = 3.6, #company's score
         domain = {'x': [0.25, 1], 'y': [0.7, 0.9]},
         title = {'text' :"Overall Sentiment"},
         gauge = {
@@ -216,8 +225,8 @@ def update_graph(option_slctd):
                 {'range': [4.2, 5], 'color': "#7cb342"}], # 100th percentile
             'bar': {'color': "black"}}))
 
-    fig.update_layout(height = 300 , margin = {'t':0, 'b':0, 'l':0})
-    fig.update_traces(title_font_size=11)
+    fig.update_layout(height = 250 , margin = {'t':0, 'b':0})
+    fig.update_traces(title_font_size=12, gauge_bar_thickness=0.3)
     return fig
 
 # Global Initiatives Table
