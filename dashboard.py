@@ -115,7 +115,7 @@ def update_graph(option_slctd):
 
 def plot_wordcloud(data):
     d = {a: x for a, x in data.values}
-    wc = WordCloud(background_color='black', width=480, height=360)
+    wc = WordCloud(background_color='white', width=480, height=360)
     wc.fit_words(d)
     return wc.to_image()
 
